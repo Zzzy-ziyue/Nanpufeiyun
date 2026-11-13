@@ -34,21 +34,27 @@ function renderStats() {
 
 function renderPlot() {
   const svg = $('#plot');
-  svg.setAttribute('viewBox', '0 0 600 240');
+  const width = svg.getBoundingClientRect().width || 600;
+  const height = svg.getBoundingClientRect().height || 240;
+  const plotX = (score) => 15 + (score - 7000) / 3000 * (width - 30);
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   svg.innerHTML = '';
+  document.querySelectorAll('.plot-axis span').forEach((label, index) => {
+    label.style.left = `${plotX(7000 + index * 500)}px`;
+  });
   for (let score = 7000; score <= 10000; score += 500) {
-    const x = 15 + (score - 7000) / 3000 * 570;
+    const x = plotX(score);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('x1', x); line.setAttribute('x2', x);
-    line.setAttribute('y1', 9); line.setAttribute('y2', 225);
+    line.setAttribute('y1', 9); line.setAttribute('y2', height - 15);
     line.setAttribute('class', 'gridline');
     svg.append(line);
   }
   pairs.forEach((pair, index) => {
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     // The vertical offset has no data meaning; it separates overlapping records.
-    const y = 15 + ((index * 73 + Math.floor(index / 9) * 19) % 205);
-    circle.setAttribute('cx', 15 + (pair.score - 7000) / 3000 * 570);
+    const y = 15 + ((index * 73 + Math.floor(index / 9) * 19) % Math.max(1, Math.floor(height - 35)));
+    circle.setAttribute('cx', plotX(pair.score));
     circle.setAttribute('cy', y);
     circle.setAttribute('r', pair === selectedPair ? 5.2 : 3.2);
     circle.setAttribute('class', `plot-dot${pair === selectedPair ? ' active' : ''}`);
@@ -76,9 +82,9 @@ function renderFeaturedPair() {
   const line2 = lineFor(pair.poem2, pair.line2);
   $('#featured-pair').innerHTML = `<div class="featured-top"><span>当前选中的诗句</span><span class="score-pill">${percent(pair.score)}</span></div>
     <div class="featured-body"><div><span class="featured-poet">王勃</span><span class="featured-title">${escapeHtml(first.title)}</span><p class="featured-verse">${escapeHtml(line1.text)}</p></div><div class="featured-divider"></div><div><span class="featured-poet">骆宾王</span><span class="featured-title">${escapeHtml(second.title)}</span><p class="featured-verse">${escapeHtml(line2.text)}</p></div></div>
-    <div class="featured-bottom">源值 ${pair.score} / 10,000 · 句序 ${pair.line1} 与 ${pair.line2}<br><button class="read-poem" data-id="${pair.poem1}" type="button">读王勃全诗 ↗</button><button class="read-poem" data-id="${pair.poem2}" type="button">读骆宾王全诗 ↗</button></div>`;
+    <div class="featured-bottom">源值 ${pair.score} / 10,000 · 句序 ${pair.line1} 与 ${pair.line2}<br><button class="read-poem" data-id="${pair.poem1}" data-line="${pair.line1}" type="button">读王勃全诗 ↗</button><button class="read-poem" data-id="${pair.poem2}" data-line="${pair.line2}" type="button">读骆宾王全诗 ↗</button></div>`;
   $('#featured-pair').querySelectorAll('.read-poem').forEach(button => button.addEventListener('click', () => {
-    selectPoem(poemFor(Number(button.dataset.id)), true);
+    selectPoem(poemFor(Number(button.dataset.id)), true, Number(button.dataset.line));
   }));
 }
 
@@ -108,14 +114,24 @@ function renderPairList() {
   $('#more-pairs').hidden = pairLimit >= result.length;
 }
 
-function selectPoem(poem, scroll = false) {
+function selectPoem(poem, scroll = false, targetLine = null) {
   selectedPoem = poem;
   activePoet = poem.poet;
   poemLimit = Math.max(18, poems.filter(candidate => candidate.poet === poem.poet).findIndex(candidate => candidate.id === poem.id) + 1);
   $('#poem-search').value = '';
   renderPoemList();
-  renderPoemReader();
-  if (scroll) $('#library').scrollIntoView({behavior:'smooth', block:'start'});
+  renderPoemReader(targetLine);
+  if (scroll) {
+    const list = $('#poem-list');
+    const activeItem = list.querySelector('.poem-item.active');
+    if (activeItem) list.scrollTop += activeItem.getBoundingClientRect().top - list.getBoundingClientRect().top - 12;
+    const reader = $('#poem-reader');
+    const lines = reader.querySelector('.reader-lines');
+    const target = lines?.querySelector('.reader-line.targeted');
+    if (target) lines.scrollTop += target.getBoundingClientRect().top - lines.getBoundingClientRect().top - 60;
+    reader.scrollIntoView({behavior:'smooth', block:'start'});
+    reader.focus({preventScroll:true});
+  }
 }
 
 function filteredPoems() {
@@ -136,14 +152,15 @@ function renderPoemList() {
   $('#more-poems').hidden = poemLimit >= result.length;
 }
 
-function renderPoemReader() {
+function renderPoemReader(targetLine = null) {
   const poem = selectedPoem;
   if (!poem) return;
   const matchedLines = matchesByPoem.get(poem.id) ?? new Set();
-  $('#poem-reader').innerHTML = `<div class="reader-header"><span class="reader-kicker">${escapeHtml(poem.poet)} · 原文</span><h3>${escapeHtml(poem.title)}</h3><div class="reader-meta">《全唐诗》编号 ${poem.id} · ${poem.lines.length} 句</div></div><div class="reader-lines">${poem.lines.map(line => `<div class="reader-line${matchedLines.has(line.index) ? ' matched' : ''}"><span class="reader-line-num">${line.index}</span><span>${escapeHtml(line.text)}</span></div>`).join('')}</div><div class="reader-legend"><i></i>有底色的诗句出现在提供的相似配对文件中。左侧数字为源文件句序。</div>`;
+  $('#poem-reader').innerHTML = `<div class="reader-header"><span class="reader-kicker">${escapeHtml(poem.poet)} · 原文</span><h3>${escapeHtml(poem.title)}</h3><div class="reader-meta">《全唐诗》编号 ${poem.id} · ${poem.lines.length} 句</div></div><div class="reader-lines">${poem.lines.map(line => `<div class="reader-line${matchedLines.has(line.index) ? ' matched' : ''}${line.index === targetLine ? ' targeted' : ''}"><span class="reader-line-num">${line.index}</span><span>${escapeHtml(line.text)}</span></div>`).join('')}</div><div class="reader-legend"><i></i>有底色的诗句出现在提供的相似配对文件中。左侧数字为源文件句序。</div>`;
 }
 
 function wireControls() {
+  window.addEventListener('resize', () => requestAnimationFrame(renderPlot));
   $('#pair-search').addEventListener('input', () => { pairLimit = 12; renderPairList(); });
   $('#score-filter').addEventListener('input', () => {
     $('#range-value').textContent = `${(Number($('#score-filter').value) / 100).toFixed(0)}%`;

@@ -1,0 +1,237 @@
+/* Visual layer only. Page structure, data and interactions remain in the original files. */
+@font-face {
+  font-family: 'LXGW WenKai Caption';
+  src: url('assets/LXGWWenKaiLite-caption.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+:root {
+  --ink: #332e25;
+  --muted: #746d5e;
+  --paper: #efe7d4;
+  --white: #fbf6e9;
+  --line: #cfc2a8;
+  --red: #a4533b;
+  --red-dark: #873b2b;
+  --sage: #667765;
+  --deep: #28362f;
+  --serif: 'Songti SC', 'STSong', 'Noto Serif SC', 'SimSun', serif;
+  --sans: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--paper);
+  background-image: radial-gradient(rgba(110, 82, 53, .055) .7px, transparent .7px);
+  background-size: 7px 7px;
+}
+
+.site-header {
+  background: #2e3b32;
+  border-bottom: 3px double rgba(219, 183, 122, .52);
+  box-shadow: 0 6px 24px rgba(62, 44, 25, .14);
+}
+.brand-mark {
+  width: 39px;
+  height: 39px;
+  border: 1px solid #c78063;
+  outline: 1px solid rgba(199, 128, 99, .55);
+  outline-offset: -5px;
+  color: #e9aa8b;
+  font-family: var(--serif);
+}
+.brand small { color: #c0c9b5; }
+.site-header nav a { position: relative; }
+.site-header nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -8px;
+  height: 1px;
+  background: #db9a76;
+  transition: right .2s ease;
+}
+.site-header nav a:hover::after,
+.site-header nav a:focus-visible::after { right: 0; }
+
+.hero {
+  color: var(--ink);
+  background: radial-gradient(circle at 75% 40%, #f9f1df 0%, #eee2c9 72%, #e4d4b8 100%);
+  border-bottom: 1px solid #cbb99a;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: .42;
+  background-image: repeating-linear-gradient(2deg, transparent 0 13px, rgba(125, 94, 57, .022) 14px, transparent 15px);
+}
+.hero-grid { position: relative; }
+.hero .eyebrow.light { color: #925038; }
+.hero h1 {
+  color: #2e352e;
+  font-weight: 600;
+  font-size: clamp(42px, 4.45vw, 66px);
+  text-shadow: 0 1px rgba(255,255,255,.45);
+}
+.hero h1 em { color: #9f4b33; }
+.hero-lede { color: #594f42; }
+.hero .button.primary {
+  color: #fff7e7;
+  background: #9b4d37;
+  border: 1px solid #7e382a;
+  box-shadow: 3px 3px 0 rgba(101, 69, 46, .18);
+}
+.hero .button.primary:hover { background: #873e2d; }
+.hero .text-link { color: #655341; border-bottom-color: #a99b80; }
+.hero-art {
+  background-image: url('assets/riverside-poets-v1.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: saturate(.83) contrast(.98);
+}
+.hero-art .orbit,
+.hero-art .name,
+.hero-art .hero-curve,
+.hero-art .hero-caption { display: none; }
+.hero-art .hero-caption {
+  display: block;
+  top: 39px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #77523f;
+  font-family: 'LXGW WenKai Caption', 'Songti SC', serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: .035em;
+  line-height: 1.55;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.eyebrow {
+  color: #9a4a34;
+  font-family: var(--serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .16em;
+}
+.section-heading h2,
+.records-heading h3 { color: #36372c; }
+.section-heading h2::after {
+  content: '';
+  display: block;
+  width: 55px;
+  height: 2px;
+  margin-top: 14px;
+  background: #aa5d41;
+  box-shadow: 12px 5px 0 -1px #b8a487;
+}
+.overview { border-bottom: 1px solid #d6c9b1; }
+.stat-grid {
+  background: #f8f0df;
+  border: 1px solid #cbbca0;
+  box-shadow: 0 8px 24px rgba(85, 66, 44, .07);
+}
+.stat { position: relative; border-right-color: #d7c9af; }
+.stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #a6553f, #c8875c 45%, transparent 46%);
+  opacity: .78;
+}
+.stat-value { color: #99432f; }
+.stat-label, .stat-sub { color: #756c59; }
+.overview-note { border-top: 1px solid #d7cbb7; margin-top: 18px; }
+
+.viz-panel,
+.featured-pair,
+.pair-card,
+.library-browser,
+.poem-reader,
+.method-card,
+.search-field,
+.select-field,
+.range-field {
+  border-color: #cdbfa3;
+  background-color: #faf4e7;
+  box-shadow: 0 4px 16px rgba(85, 66, 44, .045);
+}
+.viz-panel,
+.featured-pair,
+.poem-reader,
+.method-card { position: relative; }
+.viz-panel::before,
+.featured-pair::before,
+.poem-reader::before,
+.method-card::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(174, 152, 113, .28);
+  pointer-events: none;
+}
+.gridline { stroke: #d4c6ad; }
+.plot-dot { fill: #a34b34; }
+.plot-dot:hover, .plot-dot.active { fill: #7d3528; }
+.plot-axis { color: #776f5d; }
+.featured-pair { background: #f0e5cf; }
+.featured-divider { background: #c8b99c; }
+.featured-divider::after { background: #f0e5cf; color: #927b62; }
+.featured-verse { color: #352f28; }
+.score-pill { background: #9d4a35; }
+.featured-bottom { border-top-color: #cabc9f; }
+.read-poem { color: #873b2b; border-bottom-color: #a36b50; }
+.pair-card:hover,
+.pair-card:focus-visible { border-color: #a6563c; background: #fff9ec; }
+.pair-lines > div + div { border-left-color: #d8ccb5; }
+.load-more { border-color: #a99372; color: #5b4736; background: #f6ebd8; }
+.load-more:hover { background: #efdfc5; }
+.range-field input { accent-color: #9d4a35; }
+
+.library {
+  background-color: #e7dfca;
+  background-image: radial-gradient(rgba(79, 93, 74, .06) .8px, transparent .8px);
+  background-size: 8px 8px;
+  border-top: 1px solid #cbbca2;
+  border-bottom: 1px solid #cbbca2;
+}
+.library-browser,
+.poem-reader { background-color: #f8f0df; }
+.poet-tabs { border-bottom-color: #cbbd9f; }
+.poet-tabs button[aria-selected='true'] { border-bottom-color: #a44d36; }
+.poem-list { border-top-color: #d9cbb2; }
+.poem-item { border-bottom-color: #e1d5bf; }
+.poem-item:hover,
+.poem-item.active { background: #efe2ca; }
+.poem-item.active { border-left-color: #a44d36; }
+.reader-header,
+.reader-legend { border-color: #d4c4a8; }
+.reader-line.matched { background: #f1dfcb; border-left-color: #a44d36; }
+.reader-line.targeted { background: #ebcdb2; outline-color: #a44d36; }
+.reader-legend i { background: #dbab8c; }
+
+.method-card { background-color: #f8f0df; }
+.method-number { color: #bfa788; }
+.download-links a { color: #8d3e2e; border-bottom-color: #b98262; }
+footer { background: #2e3b32; border-top: 3px double #b58d68; }
+footer .footer-brand { margin-right: -10px; }
+
+@media (max-width: 900px) {
+  .hero-art { background-size: contain; }
+}
+@media (max-width: 650px) {
+  .hero-grid { padding-bottom: 22px; }
+  .hero h1 { font-size: clamp(34px, 8vw, 45px); }
+  .hero-art { height: 250px; margin-top: 8px; background-size: 112% auto; }
+  .hero-art .hero-caption { top: 1px; font-size: 13px; }
+  .stat:nth-child(2) { border-right: 0; }
+}
